@@ -8,6 +8,7 @@ import com.fundamentos.springboot.fundamentos.entity.User;
 import com.fundamentos.springboot.fundamentos.repository.UserRepository;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.annotations.LazyToOneOption;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.CommandLineRunner;
@@ -61,18 +62,41 @@ public class FundamentosApplication implements CommandLineRunner {
 	}
 
 	private void grtInformationJpqlFormUser(){
-		LOGGER.info("User con el método findByUserEmail: " + userRepository.findByUserEmail("danteAlonso@hotmail.com")
+		/*LOGGER.info("User con el método findByUserEmail: " + userRepository.findByUserEmail("danteAlonso@hotmail.com")
 				.orElseThrow(()-> new RuntimeException("No se encontro el usuario")));
 
 		userRepository.findAndSort("user", Sort.by("id").ascending())
 						.stream()
 						.forEach(user -> LOGGER.info("Usuarios con el método sort= " + user));
+		userRepository.findByName("Itzel").stream().forEach(user -> LOGGER.info("USUARIO CON QUERYMETHOD: " +user));
+
+		LOGGER.info("Usuario encontrado por nombre y email: " + userRepository.findByEmailAndName("danteAlonso@hotmail.com","uribe")
+				.orElseThrow(()-> new RuntimeException("USUARIO NO ENCONTRADO")));
+
+		userRepository.findByNameLike("%I%").stream()
+				.forEach(user -> LOGGER.info("Usuario findByNameLike: " + user));
+
+		userRepository.findByNameOrEmail(null,"user10@hotmail.com").stream()
+				.forEach(user -> LOGGER.info("Usuario findByNameOrEmail: " + user));
+
+		userRepository.findByNameOrEmail("user10",null).stream()
+				.forEach(user -> LOGGER.info("Usuario findByNameOrEmail: " + user));
+         */
+		userRepository.findByBirthDateBetween(LocalDate.of(2014,3,1),LocalDate.of(2014,7,2)).stream()
+			.forEach(user -> LOGGER.info("Uusuario con intervalo de fechas: "  + user));
+
+		userRepository.findByNameContainingOrderByIdDesc("user")
+		.stream()
+		.forEach(user -> LOGGER.info("Usuraio encontrado con like y ordenado "+ user));
+
+
+
 	}
 
 	private void saveUsersInDataBase(){
 		User user1 = new User("Jhon","itzel@hotmail.com", LocalDate.of(2021,03,07));
 		User user2= new User("Itzel","itzelAlonso@hotmail.com", LocalDate.of(1997,02,07));
-		User user3= new User("Dante","danteAlonso@hotmail.com", LocalDate.of(2014,8,20));
+		User user3= new User("uribe","danteAlonso@hotmail.com", LocalDate.of(2014,8,20));
 		User user4= new User("user4","user4@hotmail.com", LocalDate.of(2014,9,20));
 		User user5= new User("user5","user5@hotmail.com", LocalDate.of(2014,12,20));
 		User user6= new User("user6","user6@hotmail.com", LocalDate.of(2014,10,20));
