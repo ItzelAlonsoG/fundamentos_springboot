@@ -6,6 +6,7 @@ import com.fundamentos.springboot.fundamentos.component.ComponentDependency;
 import com.fundamentos.springboot.fundamentos.component.ComponentTwoImplemet;
 import com.fundamentos.springboot.fundamentos.entity.User;
 import com.fundamentos.springboot.fundamentos.repository.UserRepository;
+import com.fundamentos.springboot.fundamentos.service.UserService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.annotations.LazyToOneOption;
@@ -33,11 +34,13 @@ public class FundamentosApplication implements CommandLineRunner {
 	private MyBeanWithProperties myBeanWithProperties;
 	private MyMessage myMessage;
 	private UserRepository userRepository;
+	private UserService userService;
 
 
 	private UserPOJO userPOJO;
 
-	public FundamentosApplication(@Qualifier("componentTwoImplemet") ComponentDependency componentDependency, MyBean myBean,MyBeanWithDependency myBeanWithDependency,MyBeanWithProperties myBeanWithProperties,UserPOJO userPOJO,MyMessage myMessage,UserRepository userRepository){
+	public FundamentosApplication(@Qualifier("componentTwoImplemet") ComponentDependency componentDependency, MyBean myBean,MyBeanWithDependency myBeanWithDependency,MyBeanWithProperties myBeanWithProperties,UserPOJO userPOJO,MyMessage myMessage,UserRepository userRepository,UserService userService)
+	{
 		this.componentDependency=componentDependency;
 		this.myBean= myBean;
 		this.myBeanWithDependency = myBeanWithDependency;
@@ -46,6 +49,7 @@ public class FundamentosApplication implements CommandLineRunner {
 		LOGGER.error("Esto es un errro del aplicativo");
 		this.myMessage = myMessage;
 		this.userRepository = userRepository;
+		this.userService=userService;
 	}
 
 	public static void main(String[] args) {
@@ -57,9 +61,30 @@ public class FundamentosApplication implements CommandLineRunner {
 	@Override
 	public void run(String... args) throws Exception {
 		//ClasesAnteriores();
-		saveUsersInDataBase();
-		grtInformationJpqlFormUser();
+		//saveUsersInDataBase();
+		//grtInformationJpqlFormUser();
+		saveWithErrorTransactional();
 	}
+
+
+	private void saveWithErrorTransactional(){
+		User test1 = new User("Test1Trans1","TestTrans1@domain.com",LocalDate.of(2021,07,19));
+		User test2 = new User("Test2Trans1","Test2Trans1@domain.com",LocalDate.of(2021,07,19));
+		User test3 = new User("Test3Trans1","TestTrans1@domain.com",LocalDate.of(2021,07,19));
+		User test4 = new User("Test4Trans1","Test4Trans1@domain.com",LocalDate.of(2021,07,19));
+
+		List<User> users = Arrays.asList(test1,test2,test3,test4);
+		try{
+			userService.saveTransactional(users);
+
+		}catch (Exception e){
+			LOGGER.error("Esta es una excepcion dentro del método transaccional " + e);
+		}
+
+		userService.getAllUsers().stream()
+				.forEach(user -> LOGGER.info("Este es el usuario dentro del metodo transaccinal: "+user));
+	}
+
 
 	private void grtInformationJpqlFormUser(){
 		/*LOGGER.info("User con el método findByUserEmail: " + userRepository.findByUserEmail("danteAlonso@hotmail.com")
@@ -89,7 +114,8 @@ public class FundamentosApplication implements CommandLineRunner {
 		.stream()
 		.forEach(user -> LOGGER.info("Usuraio encontrado con like y ordenado "+ user));
 
-
+	LOGGER.info("El usuario a partir el named parametro es: " + userRepository.getAllByBirthDateAndEmail(LocalDate.of(2021,03,07),"itzel@hotmail.com")
+			.orElseThrow(()-> new RuntimeException("No se encontró el usuario a partir del named parameter")));
 
 	}
 
